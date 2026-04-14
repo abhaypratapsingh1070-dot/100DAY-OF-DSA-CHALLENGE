@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+
+struct Node {
+    int vertex;
+    struct Node* next;
+};
+
+struct Graph {
+    int numVertices;
+    struct Node* adjList[MAX];
+    int visited[MAX];
+}:
+
+int stack[MAX];
+int top = -1;
+
+void push(int v) {
+    stack[++top] = v;
+}
+
+int pop() {
+    return stack[top--];
+}
+struct Node* createNode(int v) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->vertex = v;
+    newNode->next = NULL;
+    return newNode;
+}
+void initGraph(struct Graph* graph, int vertices) {
+    graph->numVertices = vertices;
+    for (int i = 0; i < vertices; i++) {
+        graph->adjList[i] = NULL;
+        graph->visited[i] = 0;
+    }
+}
+
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct Node* newNode = createNode(dest);
+    newNode->next = graph->adjList[src];
+    graph->adjList[src] = newNode;
+}
+
+void topoDFS(struct Graph* graph, int v) {
+    graph->visited[v] = 1;
+
+    struct Node* temp = graph->adjList[v];
+    while (temp != NULL) {
+        int adj = temp->vertex;
+        if (!graph->visited[adj]) {
+            topoDFS(graph, adj);
+        }
+        temp = temp->next;
+    }
+
+    push(v);  
+}
+
+int main() {
+    int n, edges, u, v;
+
+    scanf("%d", &n);
+    struct Graph graph;
+    initGraph(&graph, n);
+
+    scanf("%d", &edges);
+
+    for (int i = 0; i < edges; i++) {
+        scanf("%d %d", &u, &v);
+        addEdge(&graph, u, v);
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (!graph.visited[i]) {
+            topoDFS(&graph, i);
+        }
+    }
+
+    while (top != -1) {
+        printf("%d ", pop());
+    }
+
+    return 0;
+}
